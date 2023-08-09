@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:task_international/style/app_colors.dart';
 import 'package:task_international/style/app_style.dart';
 
 import '../bloc/date_color/date_color_bloc.dart';
@@ -25,7 +26,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFFFFFF),
+      backgroundColor: AppColors.white,
       appBar: AppBar(
         title: Text("Type:${type ?? " "},  Color:${color ?? " "}"),
         elevation: 0,
@@ -44,40 +45,44 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
               itemCount: 42,
               itemBuilder: (BuildContext context, int index) {
-                return index < 7
-                    ? Container(
-                        margin: const EdgeInsets.only(right: 5, left: 5),
+                int count = index - 6;
+                int countColor = index - 6 - dayWeek;
+                int countDay = index - 5 - dayWeek;
+                if (index < 7) {
+                  return Container(
+                    margin: const EdgeInsets.only(right: 5, left: 5),
+                    child: Text(
+                      state.weekDay?[index],
+                      style: index == 6 ? AppStyle.weekDayNameRed : AppStyle.weekDayName,
+                    ),
+                  );
+                } else if (count >= dayWeek && countDay <= daysInMonth!) {
+                  return GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        color = state.colorsList?[countColor];
+                        type = state.typeList?[countColor];
+                      });
+                    },
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Color(state.daysColors![countColor]),
+                        borderRadius: BorderRadius.circular(80),
+                      ),
+                      child: Center(
                         child: Text(
-                          state.weekDay?[index],
-                          style: index == 6 ? AppStyle.weekDayNameRed : AppStyle.weekDayName,
+                          "$countDay",
+                          style: index % 7 == 6
+                              ? AppStyle.calendarCountRed
+                              : state.daysCountColors?[countColor]
+                                  ? AppStyle.calendarCountBlack
+                                  : AppStyle.calendarCountWhite,
                         ),
-                      )
-                    : index - 6 >= dayWeek && index - 5 - dayWeek <= daysInMonth!
-                        ? GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                color = state.colorsList?[index - 6 - dayWeek];
-                                type = state.typeList?[index - 6 - dayWeek];
-                              });
-                            },
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: Color(state.daysColors![index - 6 - dayWeek]),
-                                borderRadius: BorderRadius.circular(80),
-                              ),
-                              child: Center(
-                                child: Text(
-                                  "${index - 5 - dayWeek}",
-                                  style: index % 7 == 6
-                                      ? AppStyle.calendarCountRed
-                                      : state.daysCountColors?[index - 6 - dayWeek]
-                                          ? AppStyle.calendarCountBlack
-                                          : AppStyle.calendarCountWhite,
-                                ),
-                              ),
-                            ),
-                          )
-                        : const SizedBox();
+                      ),
+                    ),
+                  );
+                }
+                return const SizedBox();
               },
             );
           } else if (state is DateColorLoading) {
